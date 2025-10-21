@@ -4,7 +4,7 @@ import time
 import os
 import argparse
 import numpy as np
-from model import MedicalNet, MedicalNet_SE, MedicalNet_CBAM, MedicalNet_ECA, ConvNeXtClassifier, SwinClassifier, FusionClassifier, MedicalNet_Single_lca
+from model import MedicalNet
 from data_prepare import create_loaders  # 使用真实的数据加载器
 from torch.utils.data import DataLoader
 import glob
