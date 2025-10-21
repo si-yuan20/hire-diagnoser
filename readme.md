@@ -1,95 +1,164 @@
 ```markdown
-# 多模态医学影像分类框架
+# Hires-Diagnoser: Dual-Stream Medical Image Diagnosis Framework Based on Multi-Level Resolution Adaptive Sensing
 
 ![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)
 ![PyTorch Version](https://img.shields.io/badge/pytorch-1.12%2B-orange)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-本项目为医学影像分类提供先进的深度学习解决方案，支持多模态特征融合和混合优化策略。
+This project implements the dual-stream medical image diagnosis framework proposed in the paper "Hires-Diagnoser: A dual stream medical image diagnosis framework based on multi-level resolution adaptive sensing", combining the advantages of ConvNeXt and Swin-Transformer to achieve multi-scale feature fusion and adaptive perception.
 
-## 📂 数据集结构
+## 📋 Project Overview
+
+Hires-Diagnoser is an advanced medical image classification framework with the following core features:
+
+- **Dual-stream parallel architecture**: Simultaneously utilizes ConvNeXt for local texture feature extraction and Swin-Transformer for global context dependency capture
+- **Multi-level resolution perception**: Feature interaction at three resolution levels: 56×56, 28×28, and 14×14
+- **Adaptive feature fusion**: Dynamic cross-modal feature fusion through LCA (Light Cross-Attention) module
+- **Efficient diagnosis solution**: Achieves SOTA performance on multiple medical image datasets
+
+## 📁 Data & Weights Download
+
+### Dataset Download
+All experimental datasets can be obtained through the following link:
 ```bash
-dataset_root/
-├── class1/
-│   ├── img1.jpg
-│   ├── img2.jpg
-│   └── ...
-└── class2/
-    ├── img1.jpg
-    └── ...
+Link: https://pan.baidu.com/s/1RkIz2Utt0vTkpkPyjTN27A?pwd=9563 
+Extraction code: 9563
 ```
 
-## 🚀 快速开始
-### 训练命令
+After downloading, please organize the data according to the following directory structure:
 ```bash
-python main.py \
+datasets/
+├── Raabin-WBC/
+│   ├── Basophil/
+│   ├── Eosinophil/
+│   ├── Lymphocyte/
+│   ├── Monocyte/
+│   └── Neutrophil/
+├── Brain_Tumor_MRI/
+│   ├── Glioma/
+│   ├── Meningioma/
+│   ├── Notumor/
+│   └── Pituitary/
+├── LC25000/
+│   ├── Colon-A/
+│   ├── Benign-C/
+│   ├── Lung-A/
+│   ├── Lung-S/
+│   └── Benign-L/
+└── OCT-C8/
+    ├── AMD/
+    ├── CNV/
+    ├── CSR/
+    ├── DME/
+    ├── DR/
+    ├── MH/
+    ├── DRUSEN/
+    └── NORMAL/
+```
+
+### Pre-trained Weights
+Pre-trained ConvNeXt and Swin-Transformer weights will be automatically downloaded to the `~/.cache/torch/hub/checkpoints/` directory.
+
+## 🚀 Quick Start
+
+### Environment Setup
+```bash
+# Clone the project
+git clone https://github.com/your-username/Hires-Diagnoser.git
+cd Hires-Diagnoser
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### Training Commands
+```bash
+# Basic training
+python train.py \
   --data_dir /path/to/dataset \
+  --dataset Raabin-WBC \
   --batch_size 64 \
-  --epochs 100 \
-  --lr 1e-4 \
-  --model convnext_swin
+  --epochs 50 \
+  --lr_convnext 1e-4 \
+  --lr_swin 1e-5 \
+  --lr_fusion 1e-3
+
+# Using attention mechanism
+python train.py \
+  --data_dir /path/to/dataset \
+  --dataset Brain_Tumor_MRI \
+  --attention cbam \
+  --batch_size 32
 ```
 
-### 核心参数说明
-| 参数 | 默认值 | 说明 |
-|------|--------|------|
-| `--data_dir` | required | 数据集根目录 |
-| `--batch_size` | 64 | 批次大小 |
-| `--epochs` | 100 | 训练轮数 |
-| `--lr` | 1e-4 | 基础学习率 |
-| `--model` | convnext_swin | 模型架构选择 |
+### Testing Commands
+```bash
+python test.py \
+  --data_dir /path/to/dataset \
+  --dataset LC25000 \
+  --checkpoint /path/to/checkpoint.pth
+```
 
-## 🧠 核心功能
+## 🧠 Core Features
 
-### 网络架构特性
-- **多尺度特征融合**  
-  通过`LAF`（层级注意力融合）和`LCA`（跨模态关联）模块实现动态特征交互
+### Network Architecture Characteristics
+
+- **Dual-stream feature extraction**
   ```python
-  # 特征融合示例
-  fused_feature = LAF(layer1_feat, layer2_feat)
-  cross_modal_feat = LCA(image_feat, text_feat)
+  # ConvNeXt branch - local feature extraction
+  convnext_features = convnext_backbone(images)
+  
+  # Swin-Transformer branch - global context
+  swin_features = swin_backbone(images)
   ```
 
-### 优化策略
-| 组件 | 学习率 | 优化器 | 说明 |
-|------|--------|--------|------|
-| ConvNeXt | 1e-4 | AdamW | 分层学习率衰减 |
-| Swin | 1e-5 | Lion | 混合精度训练 |
+- **Multi-level resolution LCA fusion**
+  ```python
+  # Feature fusion at three resolution levels
+  fused_56 = LCA_module(convnext_56, swin_56)
+  fused_28 = LCA_module(convnext_28, swin_28)
+  fused_14 = LCA_module(convnext_14, swin_14)
+  ```
 
-### 评估指标
+### Optimization Strategy
+
+| Component | Learning Rate | Optimizer | Weight Decay |
+|-----------|---------------|-----------|--------------|
+| ConvNeXt Branch | 1e-4 | AdamW | 1e-4 |
+| Swin Branch | 1e-5 | AdamW | 1e-4 |
+| Fusion Module | 1e-3 | SGD | 1e-4 |
+
+### Supported Datasets
+
 ```python
-metrics = {
-    'Accuracy': 0.94,
-    'AUC': 0.96,
-    'F1': 0.92,
-    'Sensitivity': 0.89,
-    'Specificity': 0.97
+DATASETS = {
+    'Raabin-WBC': ['Basophil', 'Eosinophil', 'Lymphocyte', 'Monocyte', 'Neutrophil'],
+    'Brain_Tumor_MRI': ['Glioma', 'Meningioma', 'Notumor', 'Pituitary'],
+    'LC25000': ['Colon-A', 'Benign-C', 'Lung-A', 'Lung-S', 'Benign-L'],
+    'OCT-C8': ['AMD', 'CNV', 'CSR', 'DME', 'DR', 'MH', 'DRUSEN', 'NORMAL']
 }
 ```
 
-## 📊 可视化功能
-1. **训练监控**
-   - 实时Loss/Accuracy曲线
-   - 学习率变化趋势
+## 📊 Performance Metrics
 
-2. **结果分析**
-   ```python
-   # 生成混淆矩阵
-   plot_confusion_matrix(y_true, y_pred)
-   
-   # 绘制ROC曲线
-   plot_roc_curve(y_true, probas)
-   ```
+Test results on four benchmark datasets:
 
-3. **可解释性分析**
-   ```bash
-   python grad_cam.py --img_path sample.jpg --layer_name layer4
-   ```
-   ![Grad-CAM示例](images/cam_demo.png)
-```
----
+| Dataset | Accuracy | Precision | F1-Score | Recall |
+|---------|----------|-----------|----------|--------|
+| Raabin-WBC | 98.59% | 96.18% | 96.36% | 96.27% |
+| Brain Tumor MRI | 95.45% | 95.57% | 95.26% | 95.19% |
+| LC25000 | 99.43% | 99.44% | 99.43% | 99.43% |
+| OCT-C8 | 95.23% | 95.55% | 95.35% | 95.23% |
 
-**提示**：使用前请确保满足以下依赖：
-- CUDA 11.7+
-- PyTorch 1.12+
-- OpenCV 4.6+
+## 📝 Citation
+
+If this project is helpful for your research, please cite our paper:
+
+```bibtex
+@article{zhao2025hires,
+  title={Hires-Diagnoser: A dual stream medical image diagnosis framework based on multi-level resolution adaptive sensing},
+  author={Zhao, Si-chao and Chen, Jun-jun and Shi, Shi-long and Deng, Ge and Qiu, Xue-jun},
+  journal={Biomedical Physics & Engineering Express},
+  year={2025}
+}
 ```
