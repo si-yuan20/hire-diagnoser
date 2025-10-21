@@ -3,7 +3,7 @@
 ##############################
 import torch
 import argparse
-from model import MedicalNet,MedicalNet_CBAM,MedicalNet_ECA,MedicalNet_SE,ConvNeXtClassifier,SwinClassifier,FusionClassifier,MedicalNet_Single_lca
+from model import MedicalNet
 from data_prepare import create_loaders
 from utils import *
 from torch.optim import AdamW, SGD
@@ -192,25 +192,8 @@ def main():
     model_name = args.model_name
     # 初始化
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    if args.model_name == "MedicalNet":
-        model = MedicalNet(num_classes=len(os.listdir(args.data_dir))).to(device)
-    elif args.model_name == "MedicalNet_SE":
-        model = MedicalNet_SE(num_classes=len(os.listdir(args.data_dir))).to(device)
-    elif args.model_name == "MedicalNet_CBAM":
-        model = MedicalNet_CBAM(num_classes=len(os.listdir(args.data_dir))).to(device)
-    elif args.model_name == "MedicalNet_ECA":
-        model = MedicalNet_ECA(num_classes=len(os.listdir(args.data_dir))).to(device)
-    elif args.model_name == "Convnext":
-        model = ConvNeXtClassifier(num_classes=len(os.listdir(args.data_dir))).to(device)
-    elif args.model_name == "Swin-Transformer":
-        model = SwinClassifier(num_classes=len(os.listdir(args.data_dir))).to(device)
-    elif args.model_name == "Swin-Convnext":
-        model = FusionClassifier(num_classes=len(os.listdir(args.data_dir))).to(device)
-    elif args.model_name == "MedicalNet_Single_lca":
-        model = MedicalNet_Single_lca(num_classes=len(os.listdir(args.data_dir))).to(device)
-    else:
-        print("模型定义错误！！使用基础模型！！")
-        model = MedicalNet(num_classes=len(os.listdir(args.data_dir))).to(device)
+    model = MedicalNet(num_classes=len(os.listdir(args.data_dir))).to(device)
+   
     os.makedirs(f"result/test_result/{dataset_name}/{model_name}", exist_ok=True)
     
     # 打印模型信息
@@ -354,4 +337,5 @@ def main():
 
  
 if __name__ == '__main__':
+
     main()
